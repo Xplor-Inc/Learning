@@ -1,0 +1,89 @@
+﻿@model ExpenceManagement.Models.Account
+
+@{
+    ViewBag.Title = "New Create";
+}
+
+<h2>New Create</h2>
+
+<script>
+    function create(){
+        var Ban = document.getElementById("BankName").value;
+        if(Ban.length === 0){
+            alert("Enter Bank name")
+            return false;
+        }
+
+        var Acco = document.getElementById("AccountNumber").value;
+        if (Acco.length === 0) {
+            alert("Enter Your Account Number")
+            return false;
+        }
+
+         var Amo = document.getElementById("Amount").value;
+        if(Amo === "0"){
+            alert("Enter Amount")
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+<div style="font-family:Arial">
+
+    @using (Html.BeginForm(method: FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+
+
+        <fieldset>
+            <div class="row">
+ 
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.BankName)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.BankName, new { @class="form-control",id="BankName", placeholder="Enter BankName"})
+                        @Html.ValidationMessageFor(Model => Model.BankName)
+                    </div>
+                </div>
+
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.AccountNumber)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.AccountNumber, new { @class="form-control", placeholder="Enter AccountNumber"})
+                        @Html.ValidationMessageFor(Model => Model.AccountNumber)
+                    </div>
+                </div>
+
+
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Amount)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.Amount, new { @class="form-control", placeholder="Enter Amount"})
+                        @Html.ValidationMessageFor(Model => Model.Amount)
+                    </div>
+                </div>
+
+
+
+
+                <div class="col-3" style="padding-top:22px">
+                    <input type="submit" value="Create" class="btn btn-success" />
+                </div>
+
+            </div>
+        </fieldset>
+
+    }
+
+</div>

@@ -1,0 +1,44 @@
+﻿@model IEnumerable<ExpenceManagement.Models.Category>
+
+@{
+    ViewBag.Title = "Category List";
+}
+
+<div style="=font-family:Arial">
+
+    <h2>Category List</h2>
+
+    <p>
+        @Html.ActionLink("Create New" ,"Create")
+    </p>
+
+    <table border="1" class="table">
+        <tr>
+            <th>Id</th>
+            <th>CategoryName</th
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            @using (Html.BeginForm("Delete", "Category", new { id = item.Id }, FormMethod.Post))
+            {
+                <tr>
+                    <td>
+                        @item.Id
+                    </td>
+                    <td>
+                        @item.CategoryName
+                    </td>
+                    <td>
+                         <input type="submit" value="Delete" onclick="return confirm('Are you sure to delete amount ')" />
+                    </td>
+                     <td> @Html.ActionLink("Details","Details",new {id=item.Id})</td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+
+

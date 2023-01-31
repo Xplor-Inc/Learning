@@ -1,0 +1,48 @@
+﻿ @model  List<ExpenceManagement.Models.Account>
+
+@{
+    ViewBag.Title = "Account Index";
+}
+
+
+
+<div style="font-family:Arial">
+    <h2>Account Index</h2>
+
+    <p>
+        @Html.ActionLink("Create New" ,"Create")
+    </p>
+
+    
+
+<table border="1" class="table">
+    <tr>
+        <th>Id:</th>
+         <th>BankName:</th>
+         <th>AccountNumber:</th>
+         <th>Amount:</th>
+         
+    </tr>
+
+    @foreach(var vije in Model)
+    {
+            @using (Html.BeginForm("Delete", "Category", new { id = vije.Id }, FormMethod.Post))
+            {
+                <tr>
+                    <td>@vije.Id</td>
+                    <td>@vije.BankName</td>
+                    <td>@vije.AccountNumber</td>
+                    <td>@vije.Amount</td>
+                    <td> @Html.ActionLink("Details","Details",new {id=vije.Id})</td>
+                </tr>
+            }
+    }
+
+</table>
+
+</div>
+
+
+
+
+

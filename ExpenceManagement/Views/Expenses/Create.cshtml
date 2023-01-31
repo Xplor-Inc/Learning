@@ -1,0 +1,152 @@
+﻿@model ExpenceManagement.Models.ExpenseModel
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<script>
+    function ValidedExpenses() {
+        var cat = document.getElementById("CategoryId").value;
+        if (cat === "0") {
+            alert("Enter category Id")
+            return false;
+        }
+    
+         var Acc = document.getElementById("AccountId").value;
+        if(Acc === "0"){
+            alert("Enter Account Id")
+            return false;
+        }
+  
+        var dat = document.getElementById("date").value;
+        if(dat.length === 0){
+            alert("Select Date")
+            return false;
+        }
+    
+        var det = document.getElementById("Details").value;
+        if(det.length === 0){
+            alert("Enter Details")
+            return false;
+        }
+          var rem = document.getElementById("Remarks").value;
+        if(rem.length === 0){
+            alert("Enter Remark")
+            return false;
+        }
+         var amt = document.getElementById("Amount").value;
+        if (amt === "0") {
+            alert("Enter Your Item Amount")
+            return false;
+        }
+        return true;
+    }
+</script>
+
+
+
+
+<div style="font-family:Arial">
+    <h2>Create</h2>
+
+    @using (Html.BeginForm(method: FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+
+
+        <fieldset>
+            <div class="row">
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Expenses.CategoryId)
+                    </div>
+                    <div class="editor-field">
+                        <select name="Expenses.CategoryId" id="CategoryId" class="form-control">
+                            @{
+                                <option value="0">Select Account</option>
+                                foreach (var cate in Model.Categories)
+                                {
+                                    <option value="@cate.Id">@cate.CategoryName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        <label>AccountId</label>
+                    </div>
+                    <div class="editor-field">
+                        <select name="Expenses.AccountId" id="AccountId" class="form-control">
+                            @{
+                                <option value="0">Select Category</option>
+                                foreach (var cate in Model.Accounts)
+                                {
+                                    <option value="@cate.Id">@cate.BankName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Expenses.Date)
+                    </div>
+                    <div class="editor-field">
+                        <input type="date" name="Expenses.date" id="date" placeholder="Select Date" class="form-control">
+                        @Html.ValidationMessageFor(Model => Model.Expenses.Date)
+                    </div>
+                </div>
+
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Expenses.Details)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.Expenses.Details, new { @class="form-control", id="Details" ,placeholder="Enter Details"})
+                        @Html.ValidationMessageFor(Model => Model.Expenses.Details)
+                    </div>
+                </div>
+
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Expenses.Remarks)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.Expenses.Remarks, new { @class="form-control",id="Remarks", placeholder="Enter Remarks"})
+                        @Html.ValidationMessageFor(Model => Model.Expenses.Remarks)
+                    </div>
+                </div>
+
+
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.Expenses.Amount)
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(Model => Model.Expenses.Amount, new { @class="form-control",id="Amount", placeholder="Enter Amount"})
+                        @Html.ValidationMessageFor(Model => Model.Expenses.Amount)
+                    </div>
+                </div>
+               <div class="col-3" style="padding-top:22px">
+                    <input type="submit" value="Create" class="btn btn-success" onclick="return ValidedExpenses()" />
+                    <input type="submit" value="Create" class="btn btn-outline-success" />
+               </div>
+            </div>
+
+        </fieldset>
+
+    }
+
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+
+

@@ -1,0 +1,57 @@
+﻿@model List<ExpenceManagement.Models.Expenses>
+
+@{
+    ViewBag.Title = "Expenses List";
+}
+
+<div style="=font-family:Arial">
+
+    <h2>Expenses List</h2>
+
+    <p>
+        @Html.ActionLink("Create New" ,"Create")
+    </p>
+
+    <table border="1" class="table">
+        <tr>
+
+
+            <th>Id</th>
+            <th>Date</th>
+            <th>Details</th>
+            <th>Remarks</th>
+            <th>Amount</th>
+            <th>CategoryId</th>
+            <th>AccountId</th>
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            @using (Html.BeginForm("Delete", "Expenses", new { id = item.Id }, FormMethod.Post))
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Date</td>
+                    <td>@item.Details</td>
+                    <td>@item.Remarks</td>
+                    <td>@item.Amount</td>
+                    <td>@item.Category?.CategoryName</td>
+                    <td>@item.Account?.BankName</td>
+
+                    <td>
+                        @Html.ActionLink("Edit","Edit", new {id=item.Id})
+                        @Html.ActionLink("Details","Details",new {id=item.Id})
+
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+
+
+
+
+

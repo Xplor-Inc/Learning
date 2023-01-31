@@ -1,0 +1,37 @@
+﻿ @model ExpenceManagement.Models.Account
+
+@{
+    ViewBag.Title = "Account Details";
+}
+<div> 
+     <h2>Account Details</h2>
+
+    <table style="font-family:Arial">
+        <form method="post" action="/Account/delete/@Model.Id">
+    <input type="hidden" name="Id" value="@Model.Id" />
+          <input type="submit" value="Delete" onclick="return confirm('Are you sure to delete amount')"/>
+          </form>
+        <tr>
+            <td>Id:</td>
+            <td>@Model.Id</td>
+        </tr>
+
+        <tr>
+            <td>BankName:</td>
+            <td>@Model.BankName</td>
+        </tr>
+ 
+        <tr>
+            <td>AccountNumber:</td>
+            <td>@Model.AccountNumber</td>
+        </tr>        
+
+        <tr>
+            <td>Amount:</td>
+            <td>@Model.Amount</td>
+        </tr>
+
+    </table>
+
+    <div>@Html.ActionLink("Back to List", "Index")</div>
+</div>

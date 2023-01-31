@@ -1,0 +1,59 @@
+﻿@model ExpenceManagement.Models.Category
+
+@{
+    ViewBag.Title = "Category";
+}
+
+<script>
+    function create(){
+        var cat = document.getElementById("category").value;
+        if(cat.length === 0){
+            alert("Enter category name")
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<div style="font-family:Arial">
+    <h2>Category</h2>
+
+    @using (Html.BeginForm(method: FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+
+
+        <fieldset>
+            <div class="row">
+                <div class="col-3">
+                    <div class="editor-label">
+                        @Html.LabelFor(Model => Model.CategoryName)
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="CategoryName" id="category" placeholder="Enter Name" class="form-control" />
+                        @Html.ValidationMessageFor(Model => Model.CategoryName)
+                    </div>
+                </div>
+
+                <div class="col-3" style="padding-top:22px">
+                    <input type="submit" value="Create" class="btn btn-success" onclick="return create()" />
+                </div>
+
+
+            </div>
+        </fieldset>
+
+    }
+
+
+
+
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+
+
+

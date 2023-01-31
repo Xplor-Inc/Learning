@@ -1,0 +1,70 @@
+﻿@model ExpenceManagement.Models.Expenses
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<div style="font-family:Arial">
+    <h2>Edit</h2>
+
+    @using (Html.BeginForm(method: FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+
+
+        <fieldset>
+            <div class="editor-label">
+                @Html.LabelFor(Model => Model.Id)
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(Model => Model.Id)
+                @Html.ValidationMessageFor(Model => Model.Id)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(Model => Model.Date)
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(Model => Model.Date)
+                @Html.ValidationMessageFor(Model => Model.Date)
+            </div>
+
+
+            <div class="editor-label">
+                @Html.LabelFor(Model => Model.Details)
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(Model => Model.Details)
+                @Html.ValidationMessageFor(Model => Model.Details)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(Model => Model.Remarks)
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(Model => Model.Remarks)
+                @Html.ValidationMessageFor(Model => Model.Remarks)
+            </div>
+
+
+            <div class="editor-label">
+                @Html.LabelFor(Model => Model.Amount)
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(Model => Model.Amount)
+                @Html.ValidationMessageFor(Model => Model.Amount)
+            </div>
+
+            <p>
+                <input type="submit" value="Update" />
+            </p>
+
+        </fieldset>
+
+    }
+
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

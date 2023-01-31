@@ -1,0 +1,76 @@
+﻿ @model ExpenceManagement.Models.Expenses
+
+@{
+    ViewBag.Title = "Expenses Details";
+}
+
+<h2>Expenses Details</h2>
+
+<table style="font-family:Arial">
+    <tr>
+        <td>
+            <b>AccountId:</b>
+        </td>
+        <td>
+            @Model.Account?.BankName
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>CategoryId:</b>
+        </td>
+        <td>
+            @Model.Category?.CategoryName
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Id:</b>
+        </td>
+        <td>
+            @Model.Id
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Date:</b>
+        </td>
+        <td>
+            @Model.Date
+        </td>
+    </tr>
+     <tr>
+        <td>
+            <b>Details:</b>
+        </td>
+        <td>
+            @Model.Details
+        </td>
+    </tr>
+     <tr>
+        <td>
+            <b>Remarks:</b>
+        </td>
+        <td>
+            @Model.Remarks
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Amount:</b>
+        </td>
+        <td>
+            @Model.Amount
+        </td>
+        
+             
+    </tr>
+     
+</table>
+<form method="post" action="/expenses/delete/@Model.Id">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="submit" value="Delete" onclick="return confirm('Are you sure to delete amount @Model.Amount?')" />
+</form>
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

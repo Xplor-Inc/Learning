@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenceManagement", "ExpenceManagement.csproj", "{91EEB2CF-92BD-45D1-A148-31F4BE924087}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91EEB2CF-92BD-45D1-A148-31F4BE924087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91EEB2CF-92BD-45D1-A148-31F4BE924087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91EEB2CF-92BD-45D1-A148-31F4BE924087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91EEB2CF-92BD-45D1-A148-31F4BE924087}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B61B5253-46AF-4C64-B58C-C225284BBC1D}
+	EndGlobalSection
+EndGlobal
