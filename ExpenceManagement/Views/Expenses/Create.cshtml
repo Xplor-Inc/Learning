@@ -128,12 +128,12 @@
                         @Html.LabelFor(Model => Model.Expenses.Amount)
                     </div>
                     <div class="editor-field">
-                        @Html.TextBoxFor(Model => Model.Expenses.Amount, new { @class="form-control",id="Amount", placeholder="Enter Amount"})
+                        <input type="number" name="Amount" id="Amount" placeholder="Enter Amount" class="form-control"/>
                         @Html.ValidationMessageFor(Model => Model.Expenses.Amount)
                     </div>
                 </div>
                <div class="col-3" style="padding-top:22px">
-                    <input type="submit" value="Create" class="btn btn-success" onclick="return ValidedExpenses()" />
+                    <input type="submit" value="Create" class="btn btn-success" onclick="return ValidedExpenses()"/>
                     <input type="submit" value="Create" class="btn btn-outline-success" />
                </div>
             </div>

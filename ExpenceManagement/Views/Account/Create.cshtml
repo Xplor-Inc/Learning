@@ -7,25 +7,26 @@
 <h2>New Create</h2>
 
 <script>
-    function create(){
+    function Account() {
         var Ban = document.getElementById("BankName").value;
-        if(Ban.length === 0){
-            alert("Enter Bank name")
-            return false;
+        var error = "";
+        if (Ban.length === 0) {
+            error = "Enter Bank name"
         }
 
         var Acco = document.getElementById("AccountNumber").value;
         if (Acco.length === 0) {
-            alert("Enter Your Account Number")
-            return false;
+            error += "\nEnter Your Account Number";
         }
 
-         var Amo = document.getElementById("Amount").value;
-        if(Amo === "0"){
-            alert("Enter Amount")
+        var Amo = document.getElementById("Amount").value;
+        if (Amo.length === 0) {
+            error += "\nEnter Your Item Amount";
+        }
+        if (error.length > 0) {
+            alert(error)
             return false;
         }
-
         return true;
     }
 </script>
@@ -39,8 +40,6 @@
 
         <fieldset>
             <div class="row">
- 
-
                 <div class="col-3">
                     <div class="editor-label">
                         @Html.LabelFor(Model => Model.BankName)
@@ -51,13 +50,12 @@
                     </div>
                 </div>
 
-
                 <div class="col-3">
                     <div class="editor-label">
                         @Html.LabelFor(Model => Model.AccountNumber)
                     </div>
                     <div class="editor-field">
-                        @Html.TextBoxFor(Model => Model.AccountNumber, new { @class="form-control", placeholder="Enter AccountNumber"})
+                       <input type="number" name="AccountNumber"id="AccountNumber" placeholder="Enter AccountNumber" class="form-control"/>
                         @Html.ValidationMessageFor(Model => Model.AccountNumber)
                     </div>
                 </div>
@@ -69,7 +67,7 @@
                         @Html.LabelFor(Model => Model.Amount)
                     </div>
                     <div class="editor-field">
-                        @Html.TextBoxFor(Model => Model.Amount, new { @class="form-control", placeholder="Enter Amount"})
+                        <input type="number" name="Amount" id="Amount" placeholder="Enter Amount" class="form-control" />
                         @Html.ValidationMessageFor(Model => Model.Amount)
                     </div>
                 </div>
@@ -77,10 +75,9 @@
 
 
 
-                <div class="col-3" style="padding-top:22px">
-                    <input type="submit" value="Create" class="btn btn-success" />
-                </div>
-
+                    <div class="col-3" style="padding-top:22px">
+                        <input type="submit" value="Create" class="btn btn-success" onclick="return Account()" />
+                    </div>
             </div>
         </fieldset>
 

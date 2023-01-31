@@ -21,11 +21,12 @@
                 @Html.ValidationMessageFor(Model => Model.Id)
             </div>
 
+
             <div class="editor-label">
                 @Html.LabelFor(Model => Model.Date)
             </div>
             <div class="editor-field">
-                @Html.EditorFor(Model => Model.Date)
+              <input type="date" name="date"/>
                 @Html.ValidationMessageFor(Model => Model.Date)
             </div>
 
@@ -51,7 +52,7 @@
                 @Html.LabelFor(Model => Model.Amount)
             </div>
             <div class="editor-field">
-                @Html.EditorFor(Model => Model.Amount)
+                 <input type="number" name="Amount"/>
                 @Html.ValidationMessageFor(Model => Model.Amount)
             </div>
 
