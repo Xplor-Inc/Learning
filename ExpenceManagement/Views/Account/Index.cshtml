@@ -1,4 +1,4 @@
-﻿ @model  List<ExpenceManagement.Models.Account>
+﻿@model List<ExpenceManagement.Models.Account>
 
 @{
     ViewBag.Title = "Account Index";
@@ -13,19 +13,19 @@
         @Html.ActionLink("Create New" ,"Create")
     </p>
 
-    
 
-<table border="1" class="table">
-    <tr>
-        <th>Id:</th>
-         <th>BankName:</th>
-         <th>AccountNumber:</th>
-         <th>Amount:</th>
-         
-    </tr>
 
-    @foreach(var vije in Model)
-    {
+    <table border="1" class="table">
+        <tr>
+            <th>Id:</th>
+            <th>BankName:</th>
+            <th>AccountNumber:</th>
+            <th>Amount:</th>
+
+        </tr>
+
+        @foreach (var vije in Model)
+        {
             @using (Html.BeginForm("Delete", "Category", new { id = vije.Id }, FormMethod.Post))
             {
                 <tr>
@@ -36,10 +36,19 @@
                     <td> @Html.ActionLink("Details","Details",new {id=vije.Id})</td>
                 </tr>
             }
-    }
+        }
 
-</table>
-
+        <tr>
+            <td></td>
+            <td></td>
+            <td style="text-align:right">
+                Total Amount :
+            </td>
+            <td>
+                @Model.Sum(e=>e.Amount)
+            </td>
+        </tr>
+    </table>
 </div>
 
 

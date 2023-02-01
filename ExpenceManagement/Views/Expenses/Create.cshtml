@@ -95,7 +95,7 @@
                         @Html.LabelFor(Model => Model.Expenses.Date)
                     </div>
                     <div class="editor-field">
-                        <input type="date" name="Expenses.date" id="date" placeholder="Select Date" class="form-control">
+                        <input type="date" name="Expenses.date" value="@Model.Expenses.Date" id="date" placeholder="Select Date" class="form-control">
                         @Html.ValidationMessageFor(Model => Model.Expenses.Date)
                     </div>
                 </div>
@@ -128,7 +128,7 @@
                         @Html.LabelFor(Model => Model.Expenses.Amount)
                     </div>
                     <div class="editor-field">
-                        <input type="number" name="Amount" id="Amount" placeholder="Enter Amount" class="form-control"/>
+                        <input type="number" name="Expenses.Amount" value="@Model.Expenses.Amount" id="Amount" placeholder="Enter Amount" class="form-control"/>
                         @Html.ValidationMessageFor(Model => Model.Expenses.Amount)
                     </div>
                 </div>

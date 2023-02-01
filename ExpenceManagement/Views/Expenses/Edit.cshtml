@@ -13,7 +13,7 @@
 
 
         <fieldset>
-            <div class="raw">
+            <div class="row">
                 <div class="col-3">
                     <div class="editor-label">
                         @Html.LabelFor(Model => Model.Id)
@@ -29,7 +29,7 @@
                         @Html.LabelFor(Model => Model.Date)
                     </div>
                     <div class="editor-field">
-                        <input type="date" name="date" class="form-control" />
+                        <input type="datetime" name="date" class="form-control" value="@Model.Date.ToString("dd-MMM-yyyy")" />
                         @Html.ValidationMessageFor(Model => Model.Date)
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         @Html.LabelFor(Model => Model.Amount)
                     </div>
                     <div class="editor-field">
-                        <input type="number" name="Amount" class="form-control"/>
+                        <input type="number" name="Amount" class="form-control" value="@Model.Amount" />
                         @Html.ValidationMessageFor(Model => Model.Amount)
                     </div>
                 </div>
