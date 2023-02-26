@@ -10,7 +10,7 @@ namespace ExpenceManagement.Controllers
         ExpensesContext expensesContext = new ExpensesContext();
         public ActionResult Index()
         {
-           var expenses = expensesContext.Expenses.Include("Account").Include("Category").ToList(); 
+            var expenses = expensesContext.Expenses.Include("Account").Include("Category").ToList(); 
             
             return View(expenses);
         }

@@ -26,6 +26,7 @@ public class ExpenseModel
         public Expenses Expenses { get; set; }
         public List<Category> Categories { get; set; }
         public List<Account> Accounts { get; set; }
+        
     }
 }
 
