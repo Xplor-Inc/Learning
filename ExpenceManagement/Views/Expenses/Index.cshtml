@@ -28,6 +28,8 @@
          <Form class="col-3" style="padding:10px" class="form-control">
             @using (Html.BeginForm("Index", "Expenses", FormMethod.Get))
             {
+                <b>Search by</b> @Html.RadioButton("searchby", "Details", true)<b>Details</b>
+                @Html.RadioButton("searchby", "Remarks")<b>Remarks</b><br />
                 @Html.TextBox("search") <button type="submit" value="Search" class="btn btn-primary">Search</button/>
             }
         </Form>
