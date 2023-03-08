@@ -8,10 +8,20 @@ namespace ExpenceManagement.Controllers
     public class ExpensesController : Controller
     {
         ExpensesContext expensesContext = new ExpensesContext();
-        public ActionResult Index()
+        public ActionResult Index(string Searchby, string search)
         {
-            var expenses = expensesContext.Expenses.Include("Account").Include("Category").ToList(); 
-            
+            var expenses = expensesContext.Expenses.Include("Account").Include("Category").ToList();
+
+            if (Searchby == "Details")
+            {
+                var model = expensesContext.Expenses.Where(exp => exp.Details == search || search == null).ToList();
+                return View(model);
+            }
+            else
+            {
+                var model = expensesContext.Expenses.Where(exp => exp.Remarks.StartsWith(search) || search == null).ToList();
+                return View(model);
+            }
             return View(expenses);
         }
 

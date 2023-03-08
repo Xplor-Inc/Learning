@@ -1,22 +1,20 @@
 ﻿@model List<ExpenceManagement.Models.Expenses>
 
-   
+
 @{
     ViewBag.Title = "Expenses List";
 }
 <style>
-    .first{
-        background-color:palevioletred;
-        color:black;
-        border:4px solid green;
+    .first {
+        background-color: palevioletred;
+        color: black;
+        border: 4px solid green;
     }
 
-    h2{
-        text-align:center;
-        background-color:red;
-        color:black;
-        border:2px solid red 20px;
-        
+    h2 {
+        text-align: center;
+        background-color: red;
+        color: black;
     }
 </style>
 <div class="first">
@@ -26,16 +24,13 @@
         <div class="col-3" style="padding:22px">
             @Html.ActionLink("Add Expenses" ,"Create")
         </div>
-        <div class="col-3" style="padding:10px">
-            <form method="get">
-                <div class="input-group">
-                    <input class="form-control" />
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+
+         <Form class="col-3" style="padding:10px" class="form-control">
+            @using (Html.BeginForm("Index", "Expenses", FormMethod.Get))
+            {
+                @Html.TextBox("search") <button type="submit" value="Search" class="btn btn-primary">Search</button/>
+            }
+        </Form>
     </div>
 
     <table border="1" class="table">
@@ -70,6 +65,7 @@
                 </tr>
             }
         }
+
         <tr>
             <td></td>
             <td></td>
