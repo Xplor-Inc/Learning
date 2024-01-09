@@ -1,0 +1,42 @@
+﻿@page "/budget";
+
+@attribute [Authorize]
+
+<PageTitle>Budget Management</PageTitle>
+
+<div class="@popupClass">
+    <form class="form">
+        <div class="heading">Budget Management</div>
+        <span class="closeX bg-white" @onclick="@ClosePopup">X</span>
+        <div class="row">
+            <div class="col-md-4">
+                <label class="required">Select Month</label>
+                <input type="date" class="form-control" placeholder="Budget Month">
+            </div>
+            <div class="col-md-4">
+                <label class="required">Budget Amount</label>
+                <input type="number" class="form-control" placeholder="Total Budget">
+            </div>
+            <div class="col-md-4">
+                <label class="required">Description</label>
+                <input type="text" class="form-control" placeholder="Budget Description">
+            </div>
+            <div class="col-md-2 col-6 button-pt button-mt">
+                <input type="submit" class="btn btn-success" value="Create">
+            </div>
+        </div>
+    </form>
+</div>
+<div class="@overlayClass"></div>
+@code {
+
+    private string popupClass = "popup";
+    private string overlayClass = "overlay";
+
+    private void ClosePopup()
+    {
+        popupClass = "visually-hidden";
+        overlayClass = "visually-hidden";
+    }
+
+}

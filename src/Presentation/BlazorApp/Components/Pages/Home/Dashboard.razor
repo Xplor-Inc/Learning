@@ -1,0 +1,197 @@
+﻿@using BlazorApp.Components.Pages.Home;
+
+@page "/"
+
+@attribute [Authorize]
+
+@inject IJSRuntime JS;
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject INotificationService NotificationService
+
+
+<PageTitle>Dashboard</PageTitle>
+
+<div style="display:flex;justify-content:center;">
+    <div class="page">
+        <h2 class="page-heading">
+            Financial Summary
+            <span style="font-size:12px;">Oct-23</span>
+        </h2>
+        <div class="flex">
+            @for (int i = 0; i < Datas.Count; i++)
+            {
+                var a = @Datas[i];
+                <div class="info-box">
+                    <div class="heading">@a.Title</div>
+                    <span class="amount">@a.Value.ToString("#.##.###")</span>
+                    @if (a.Success)
+                    {
+                        <span class="success">
+                            <span style="font-size:12px;" class="oi @(a.Type == ChangeType.Positive ? "oi-arrow-top":"oi-arrow-bottom")"></span>@a.Change%
+                        </span>
+                        <div style="">
+                            @if (a.Type == ChangeType.Positive)
+                            {
+                                <ChartIndicator Positive=@true Color="green" />
+                            }
+                            else
+                            {
+                                <ChartIndicator Positive=@false Color="green" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="fail">
+                            <span style="font-size:12px;" class="oi @(a.Type == ChangeType.Positive ? "oi-arrow-top":"oi-arrow-bottom")"></span>@a.Change%
+                        </span>
+                        <div style="">
+                            @if (a.Type == ChangeType.Positive)
+                            {
+                                <ChartIndicator Positive=@true Color="red" />
+                            }
+                            else
+                            {
+                                <ChartIndicator Positive=@false Color="red" />
+                            }
+                        </div>
+                    }
+                    <div class="text">@a.SubText</div>
+                </div>
+            }
+            <div class="info-box info-box-2">
+                <div class="heading w-50">Tax Paid</div>
+                <div class="w-50">
+                    <div class="amount">7766</div>
+                    <div class="success">
+                        <span style="font-size:12px;" class="oi oi-arrow-bottom"></span>38%
+                        <span class="text">vs Prev Month</span>
+                    </div>
+                </div>
+            </div>
+            <div class="info-box info-box-2">
+                <div class="heading w-50">Spiritual Spends</div>
+                <div class="w-50" style="display:flex;justify-content:space-evenly;">
+                    <div class="amount">7766</div>
+                    <div class="success">
+                        <span style="font-size:12px;" class="oi oi-arrow-bottom"></span>38%
+                        <span class="text">vs Prev Month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="info-box" style="height:235px">
+                <div class="heading">
+                    Assets
+                </div>
+                <div style="height:180px" id="chartdiv1">
+                </div>
+            </div>
+            <div class="info-box" style="height:235px">
+                <div class="heading">
+                    Top Spending
+                </div>
+                <div style="height:200px" id="chartdiv2">
+                </div>
+            </div>
+            <div class="info-box" style="height:235px">
+                <div class="heading">
+                    Actual Saving
+                </div>
+                <div style="height:200px" id="chartdiv3">
+                </div>
+            </div>
+            <div class="info-box" style="height:235px">
+                <div class="heading">
+                    Budget
+                </div>
+                <div style="height:200px" id="chartdiv4">
+                </div>
+            </div>
+            <div class="info-box" style="height:235px; width:425px;">
+                <div class="heading">
+                    Income vs Expense Trends
+                </div>
+                <div style="height:200px" id="chartdiv5">
+                </div>
+            </div>
+            <div class="info-box" style="height:235px; width:425px;">
+                <div class="heading">
+                    Top Expense Transactions
+                </div>
+                <div class="table-responsive" style="height:200px">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Perticullar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>17-Oct</td>
+                                <td>1001</td>
+                                <td>XYZ </td>
+                            </tr>
+                            <tr>
+                                <td>18-Oct</td>
+                                <td>298</td>
+                                <td>ABC </td>
+                            </tr>
+                            <tr>
+                                <td>01-Oct </td>
+                                <td>239</td>
+                                <td>Item 1</td>
+                            </tr>
+                            <tr>
+                                <td>06-Oct</td>
+                                <td>745 </td>
+                                <td>Item 2 </td>
+                            </tr>
+                            <tr>
+                                <td>11-Oct</td>
+                                <td>765</td>
+                                <td>Item 3</td>
+                            </tr>
+                            <tr>
+                                <td>15-Oct </td>
+                                <td>567 </td>
+                                <td>Item 4</td>
+                            </tr>
+
+                            <tr>
+                                <td>06-Oct</td>
+                                <td>745 </td>
+                                <td>Item 2 </td>
+                            </tr>
+                            <tr>
+                                <td>11-Oct</td>
+                                <td>765</td>
+                                <td>Item 3</td>
+                            </tr>
+                            <tr>
+                                <td>15-Oct </td>
+                                <td>567 </td>
+                                <td>Item 4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+       @*  <div class="flex">
+            <ChartWithTable Title="Income" />
+            <ChartWithTable Title="Interest Paid" />
+            <ChartWithTable Title="Amount Receivable" />
+            <ChartWithTable Title="Amount Payable" />
+            <ChartWithTable Title="Credit Card Pending" />
+            <ChartWithTable Title="Loan Outstanding" />
+            <ChartWithTable Title="Fixed Liabilities" />
+            <ChartWithTable Title="Investment" />
+        </div> *@
+    </div>
+</div>

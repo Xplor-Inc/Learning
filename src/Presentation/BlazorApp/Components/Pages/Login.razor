@@ -1,0 +1,107 @@
+﻿@page "/account/login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims;
+
+@inject IConfiguration config;
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Log in</PageTitle>
+
+<div>
+    <div class="row">
+        <div class="offset-md-4 col-md-4">
+            <section class="form">
+                <div class="heading">Login Form</div>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="bg-danger text-white p-2 m-2 mb-3">@errorMessage</div>
+                }
+                <EditForm class="p-3" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label for="email" class="form-label">UserName</label>
+                        <InputText @bind-Value="Input.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="123" />
+                        <ValidationMessage For="() => Input.UserName" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                        <ValidationMessage For="() => Input.Password" class="text-danger" />
+                    </div>
+
+                    <div>
+                        <button type="submit" class="w-100 btn btn-primary">Log in</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+    </div>
+    <div>
+        <div class="col-12 text-end modal-footer">
+            @config.GetSection("Version").Value
+        </div>
+    </div>
+</div>
+@code {
+    private string? errorMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync("CA");
+        }
+    }
+    private AuthenticationProperties GetProperties()
+    {
+        return new AuthenticationProperties
+            {
+                AllowRefresh = true,
+                IssuedUtc = DateTimeOffset.Now,
+                ExpiresUtc = DateTimeOffset.Now.AddMinutes(10),
+                IsPersistent = false
+            };
+    }
+    public async Task LoginUser()
+    {
+        if (Input.UserName != "HS2024" || Input.Password != "HS2024@.123")
+        {
+            errorMessage = "Invalid creds...";
+            return;
+        }
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, Input.UserName),
+            new Claim(ClaimTypes.Name,  "Admin"),
+        };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "CA"));
+        var properties = GetProperties();
+        await HttpContext.SignInAsync("CA", userPrincipal, properties);
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string UserName { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+    }
+}

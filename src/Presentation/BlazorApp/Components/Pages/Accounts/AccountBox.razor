@@ -1,0 +1,29 @@
+﻿
+<div class="bankFilter @Class">
+    <div class="h4 flex">
+        <div class="text-start ps-2">@Title</div>
+        <div class="circle-text">@Count</div>
+    </div>
+    <div class="h6 flex">
+        <div class="text-start ps-1">@SubTitle</div>
+        <div class="text-end pe-2">@Total</div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string Class { get; set; } = default!;
+
+    [Parameter]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public int Count { get; set; }
+
+    [Parameter]
+    public string SubTitle { get; set; } = default!;
+
+    [Parameter]
+    public decimal Total { get; set; }
+}

@@ -1,0 +1,132 @@
+﻿@page "/categories";
+
+@attribute [Authorize]
+
+@using Blazorise.Components;
+@using Blazorise;
+
+@inject IJSRuntime JS;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+
+<PageTitle>Category &amp; Tag Management</PageTitle>
+@if (Loading)
+{
+    <Loader />
+}
+<div class="form">
+    <Validations Mode="ValidationMode.Auto" @ref="CustomValidation" Model="@Model" ValidateOnLoad=false HandlerType="typeof(FluentValidationHandler)">
+        <div class="row">
+            <div class="col-md-4 col-6">
+                <label class="required">Transaction Type</label>
+                <Validation>
+                    <SelectList Class="form-control" TItem="CategoryType" TValue="CategoryType" @bind-SelectedValue="@Model.Type">
+                        <ChildContent>
+                            <option value="" disabled="disabled">Select Type</option>
+                            @foreach (var value in Enum.GetValues<CategoryType>())
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </ChildContent>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </SelectList>
+                </Validation>
+            </div>
+            <div class="col-md-4">
+                <label class="required">Category Name</label>
+                <Validation>
+                    <TextEdit Class="form-control" @bind-Text=Model.Name>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-4">
+                <label class="required">Category Description</label>
+                <Validation>
+                    <TextEdit Class="form-control" @bind-Text=Model.Description>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-4">
+                <label class="required">Category Color</label>
+                <Validation>
+                    <ColorEdit Class="form-control" @bind-Color=Model.Color>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </ColorEdit>
+                </Validation>
+            </div>
+            <div class="col-md-1 col-3">
+                <label class="required">Status</label>
+                <div>
+                    <Check @bind-Checked=Model.IsActive TValue="bool" />
+                    <span></span>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 button-pt button-mt">
+                @if (EditingForm)
+                {
+                    <Button Class="btn me-3 btn-warning" Clicked="Update">Update</Button>
+                    <button type="button" class="btn btn-primary" @onclick="()=>{ EditingForm = false; Model = new CategoryDto ();}">Close</button>
+                }
+                else
+                {
+                    <Button Class="btn me-3 btn-success" Clicked="Submit">Create</Button>
+                }
+            </div>
+        </div>
+    </Validations>
+   
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR#</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Color</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Categories.Count == 0)
+                {
+                    <tr>
+                        <td class="p-2 text-danger text-center" colspan="6">There is no category created yet..</td>
+                    </tr>
+                }
+                @for (int i = 0; i < Categories.Count; i++)
+                {
+                    var cat = Categories[i];
+                    <tr style="background-color:@(cat.IsActive ? "initial":"#f8e8e8")">
+                        <td>@(i + 1)</td>
+                        <td>@(cat.Type)</td>
+                        <td>@(cat.Name)</td>
+                        <td> <span class="bg-tags" style="color:@cat.Color; background-color:@cat.Color?.HexToRGBA(0.2M)">@(cat.Color)</span> </td>
+                        <td>@(cat.Description)</td>
+                        <td>
+                            <span class="oi oi-list add-button add-button-table" role="button" @onclick="()=>{Model = cat; EditingForm = true;}"></span>
+                            <EditForm Model="Model" OnValidSubmit="()=>Delete(cat.Id)" method="post" style="display:inline">
+                                <InputNumber @bind-Value=cat.Id class="visually-hidden" />
+                                <button type="submit" onclick="return window.confirm('Are you sure to delete Category @cat.Name')" role="button" value="" class="oi oi-trash add-button add-button-table text-danger">
+                                </button>
+                            </EditForm>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

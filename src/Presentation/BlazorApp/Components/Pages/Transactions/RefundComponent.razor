@@ -1,0 +1,113 @@
+﻿
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IRepositoryConductor<RefundHistory> RefundRepo;
+@inject INotificationService NotificationService ;
+@inject IMapper Mapper;
+
+<div class="@PopupClass">
+    <EditForm Model=Model id="refundForm" class="form" method="post" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="heading">Refund Transaction</div>
+        <span class="closeX bg-white" @onclick="()=>ProcessRefundPopup.InvokeAsync(false)">X</span>
+        <div class="col-12">
+            <ValidationSummary class="text-danger" />
+            <CustomValidation @ref="CustomValidation" />
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="required">Transaction Account</label>
+                <select class="form-control" value="@TransactionAccountId" disabled="disabled" style="color:@color; background-color:@color?.HexToRGBA(0.3M)">
+                    <optgroup label="Saving Accounts">
+                        @foreach (var value in Accounts)
+                        {
+                            <option value="@value.Id">@value.Name</option>
+                        }
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="required">Credit Account</label>
+                <InputSelect class="form-control" @bind-Value=Model.RefundAccountId>
+                    <option value="0">Select Account</option>
+                    <optgroup label="Saving Accounts">
+                        @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Saving))
+                        {
+                            var color = AccountType.Saving.GetAccountColor();
+                            <option style="color:@color; background-color:@color.HexToRGBA(0.3M)" value="@value.Id">@value.Name</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Cash Accounts">
+                        @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Cash))
+                        {
+                            var color = AccountType.Cash.GetAccountColor();
+                            <option style="color:@color; background-color:@color.HexToRGBA(0.3M)" value="@value.Id">@value.Name</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Credit  Accounts">
+                        @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.CreditCard))
+                        {
+                            var color = AccountType.CreditCard.GetAccountColor();
+                            <option style="color:@color; background-color:@color.HexToRGBA(0.3M)" value="@value.Id">@value.Name</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Loan Accounts">
+                        @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Loan))
+                        {
+                            var color = AccountType.Loan.GetAccountColor();
+                            <option style="color:@color; background-color:@color.HexToRGBA(0.3M)" value="@value.Id">@value.Name</option>
+                        }
+                    </optgroup>
+                </InputSelect>
+            </div>
+
+            <div class="col-md-3">
+                <label class="required">Refund Date</label>
+                <InputDate @bind-Value="@Model.RefundDate" class="form-control" placeholder="Transaction Date" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="required">Amount</label>
+                <InputNumber @bind-Value=Model.Amount type="number" class="form-control" placeholder="Amount"
+                              />
+            </div>
+            <div class="col-md-3">
+                <label class="required">Remark</label>
+                <InputText @bind-Value=Model.Remark type="text" class="form-control" placeholder="Remark" max="100" />
+                @*     <Autocomplete TItem="string"
+                TValue="string"
+                Data="@Remarks"
+                TextField="@(( item ) => item)"
+                ValueField="@(( item ) => item)"
+                Placeholder="Search..."
+                SelectionMode="AutocompleteSelectionMode.Default"
+                FreeTyping
+                @bind-SelectedText="Model.Particular"
+                @bind-SelectedValue="Model.Particular">
+                <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+                </Autocomplete> *@
+            </div>
+            @*  <div class="col-md-3">
+            <label>Tags</label>
+            <Autocomplete TItem="CategoryModel"
+            TValue="long"
+            Data="@Categories"
+            TextField="@(( item ) => item.Name)"
+            ValueField="@(( item ) => item.Id)"
+            Placeholder="Search..."
+            SelectionMode="AutocompleteSelectionMode.Multiple"
+            FreeTyping
+            @bind-SelectedTexts="Model.TagNames"
+            @bind-SelectedValues="Model.TagIds">
+            <NotFoundContent> Sorry... @context was not found! :( </NotFoundContent>
+            </Autocomplete>
+            </div>*@
+            <div class="col-md-4 button-pt">
+                <input type="submit" class="btn btn-warning me-3" value="Refund">
+                <input type="button" class="btn btn-danger" value="Close" @onclick="()=>ProcessRefundPopup.InvokeAsync(false)" />
+            </div>
+        </div>
+    </EditForm>
+</div>
+<div class="@OverlayClass"></div>
+

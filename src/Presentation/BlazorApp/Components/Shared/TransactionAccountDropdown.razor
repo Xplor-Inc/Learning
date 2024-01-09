@@ -1,0 +1,40 @@
+﻿@code {
+    [Parameter]
+    public IEnumerable<TransactionAccountDto> Accounts { get; set; } = [];
+
+    [Parameter]
+    public string DefaultText { get; set; } = "Select";
+
+    [Parameter]
+    public bool Required { get; set; } = true;
+
+    [Parameter]
+    public bool AllowZeroBalance { get; set; } = false;
+}
+
+<option disabled="@Required" value="0">@DefaultText</option>
+<optgroup label="Saving Accounts">
+    @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Saving))
+    {
+        var c = (!AllowZeroBalance && value.Balance <= 0) ? "inherit" : value.AccountType.GetAccountColor();
+        <option disabled="@(c == "inherit")" style="color:@c;" value="@value.Id">@value.Name</option>
+    }
+</optgroup>
+<optgroup label="Cash Accounts">
+    @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Cash))
+    {
+        <option style="color:@value.AccountType.GetAccountColor();" value="@value.Id">@value.Name</option>
+    }
+</optgroup>
+<optgroup label="Credit  Accounts">
+    @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.CreditCard))
+    {
+        <option style="color:@value.AccountType.GetAccountColor();" value="@value.Id">@value.Name</option>
+    }
+</optgroup>
+<optgroup label="Loan Accounts">
+    @foreach (var value in Accounts.Where(e => e.AccountType == AccountType.Loan))
+    {
+        <option style="color:@value.AccountType.GetAccountColor();" value="@value.Id">@value.Name</option>
+    }
+</optgroup>

@@ -1,0 +1,237 @@
+﻿@page "/transaction-accounts";
+
+@attribute [Authorize]
+
+@using Blazorise;
+@using XploringMe.BlazorApp.Components.Pages.Transactions;
+
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+<PageTitle>Account Management</PageTitle>
+
+@if (LoadingPage)
+{
+    <Loader />
+}
+@if (EditAccount)
+{
+    <div class="form popup fadeIn">
+        <Edit CloseForm="()=>EditAccountPopup(false, null)" Model="Model" />
+    </div>
+    <div class="overlay"></div>
+}
+@if (CreateTransaction)
+{
+    <div class="popup">
+        <TransactionForm Accounts="Accounts" Categories="Categories" TransactionAccountId=TransactionAaccountId CloseForm="CloseTransactionPopup" />
+    </div>
+    <div class="overlay"></div>
+}
+
+@if (AddAccount)
+{
+    <div class="popup fadeIn">
+        <EditForm Model=Model class="form" method="post" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <div class="heading">Add Account</div>
+            <span class="closeX bg-white" @onclick="()=>CreateAccountPopup(false)">X</span>
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="required">Account Type</label>
+                    <InputSelect class="form-control" @bind-Value=Model.AccountType>
+                        <option value="0">Select</option>
+                        @foreach (var value in Enum.GetValues<AccountType>())
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </InputSelect>
+
+                </div>
+                <div class="col-md-3">
+                    <label class="required">Account Name</label>
+                    <InputText @bind-Value=Model.Name type="text" class="form-control" placeholder="Account Name" />
+                </div>
+                <div class="col-md-3">
+                    <label class="required">Account No</label>
+                    <InputText @bind-Value=Model.AccountNumber type="text" class="form-control" placeholder="Account No" />
+                </div>
+                <div class="col-md-3">
+                    <label class="required">Opening Balance</label>
+                    <InputNumber @bind-Value=Model.OpeningBalance class="form-control" placeholder="Opening Balance" />
+                </div>
+                <div class="col-md-3">
+                    <label class="required">Mobile No</label>
+                    <InputText @bind-Value=Model.MobileNumber type="text" class="form-control" placeholder="Mobile No" />
+                </div>
+                <div class="col-md-3">
+                    <label class="required">Statement Day</label>
+                    <InputNumber @bind-Value=Model.StatementDay class="form-control" placeholder="Statement Day" />
+                </div>
+                <div class="col-md-1 col-3">
+                    <label class="required">Status</label>
+                    <div>
+                        <InputCheckbox type="checkbox" @bind-Value=Model.IsActive />
+                        <label></label>
+                    </div>
+                </div>
+                <div class="col-md-3 col-9 button-pt button-mt">
+                    <input type="submit" class="btn btn-success" value="Create">
+                </div>
+            </div>
+        </EditForm>
+    </div>
+    <div class="overlay"></div>
+}
+
+<div class="form">
+    <div class="flex heading">
+        <div class="">Account Management</div>
+        <span class="oi oi-plus add-button" role="button" @onclick="()=>CreateAccountPopup(true)"></span>
+    </div>
+    <div class="row">
+        <div class="col-md-3" @onclick="()=>FilterAccounts(AccountType.Saving)">
+            <AccountBox Class="@(SelectedAccountType == AccountType.Saving ? "active" : "bg-success")"
+                        Count="Accounts.Count(e=>e.AccountType == AccountType.Saving)"
+                        SubTitle="Bank Saving"
+                        Title="Bank Accounts"
+                        Total="Accounts.Where(e=>e.AccountType == AccountType.Saving && e.IsActive).Sum(s=>s.Balance)" />
+        </div>
+        <div class="col-md-3" @onclick="()=>FilterAccounts(AccountType.Cash)">
+            <AccountBox Class="@(SelectedAccountType == AccountType.Cash ? "active" : "bg-info")"
+                        Count="Accounts.Count(e=>e.AccountType == AccountType.Cash)"
+                        SubTitle="Cash"
+                        Title="Cash in hands"
+                        Total="Accounts.Where(e=>e.AccountType == AccountType.Cash && e.IsActive).Sum(s=>s.Balance)" />
+        </div>
+        <div class="col-md-3" @onclick="()=>FilterAccounts(AccountType.CreditCard)">
+            <AccountBox Class="@(SelectedAccountType == AccountType.CreditCard ? "active" : "bg-danger")"
+                        Count="Accounts.Count(e=>e.AccountType == AccountType.CreditCard)"
+                        SubTitle="Outstanding"
+                        Title="Credit Card"
+                        Total="Accounts.Where(e=>e.AccountType == AccountType.CreditCard && e.IsActive).Sum(s=>s.Balance)" />
+        </div>
+        <div class="col-md-3" @onclick="()=>FilterAccounts(AccountType.Loan)">
+            <AccountBox Class="@(SelectedAccountType == AccountType.Loan ? "active" : "bg-warning")"
+                        Count="Accounts.Count(e=>e.AccountType == AccountType.Loan)"
+                        SubTitle="Total Borrow"
+                        Title="Loan Account"
+                        Total="Accounts.Where(e=>e.AccountType == AccountType.Loan && e.IsActive).Sum(s=>s.Balance)" />
+        </div>
+    </div>
+
+    <div class="table-responsive p-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR#</th>
+                    <th>Account Name</th>
+                    <th>Account No</th>
+                    <th>Account Type</th>
+                    <th>Opening Balance</th>
+                    <th>Curr Balance</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (SelectedAccounts.Count == 0)
+                {
+                    <tr>
+                        <td class="p-2 text-warning text-center" colspan="7">
+                            There is no accounts in @SelectedAccountType category,
+                            <span role="button" @onclick="()=>CreateAccountPopup(true)" class="btn-link">add now</span>
+                        </td>
+                    </tr>
+                }
+                @for (int i = 0; i < SelectedAccounts.Count; i++)
+                {
+                    var act = SelectedAccounts[i];
+                    <tr style="background-color:@(act.IsActive ? "initial":"#f8e8e8")">
+                        <td>@(i + 1)</td>
+                        <td>@(act.Name)</td>
+                        <td>@(act.AccountNumber)</td>
+                        <td>@(act.AccountType)</td>
+                        <td>@(act.OpeningBalance)</td>
+                        <td>@(act.Balance)</td>
+                        <td class="text-end">
+                            <span @onclick="()=>{CreateTransaction = true; TransactionAaccountId = act.Id;}">
+                                <CustomIcon Name="CustomIcon.IconType.Transaction" Class="svg-action circle-text circle-text-list text-white" />
+                            </span>
+                            <span @onclick="()=>EditAccountPopup(true,act)">
+                                <CustomIcon Name="CustomIcon.IconType.Edit" Class="svg-action circle-text circle-text-list text-warning" />
+                            </span>
+                            <EditForm Model="Model" OnValidSubmit="()=>Delete(act.Id)" method="post" style="display:inline">
+                                <InputNumber @bind-Value=act.Id class="visually-hidden" />
+                                <button type="submit" onclick="return window.confirm('Are you sure to delete account @act.Name')" class="border-0 bg-transparent">
+                                    <CustomIcon Name="CustomIcon.IconType.Delete" Class="svg-action circle-text circle-text-list text-danger" />
+                                </button>
+                            </EditForm>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="heading">Recent Transactions</div>
+    <div class="table-responsive pt-1">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR.</th>
+                    <th>Date</th>
+                    <th>Account</th>
+                    <th>Category</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Balance</th>
+                    <th>Remark</th>
+                    <th>Tags</th>
+                    <th>Created On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Expenses.Count == 0)
+                {
+                    <tr>
+                        <td class="p-2 text-danger text-center" colspan="11">There is no expenses</td>
+                    </tr>
+                }
+                @for (int a = 0; a < Expenses.Count; a++)
+                {
+                    var ex = Expenses[a];
+                    var clr = ex.TransactionType.GetTransactionColor();
+                    <tr style="font-weight:@(ex.IsRefunded ? "700":"400")">
+                        <td>@(a + 1)</td>
+                        <td>@($"{ex.TransactionDate:dd-MMM-yyyy}")</td>
+                        <td> <span class="bg-tags" style="color:@clr; background-color:@clr?.HexToRGBA(0.2M)">@ex.TransactionAccount?.Name</span> </td>
+                        <td> <span class="bg-tags" style="color:@ex.Category?.Color; background-color:@ex.Category?.Color.HexToRGBA(0.2M)">@ex.Category?.Name</span> </td>
+                        <td>@ex.Debit</td>
+                        <td>@ex.Credit</td>
+                        <td>@ex.CurrentBalance</td>
+                        <td>@ex.Particular</td>
+                        <td>
+                            <div style="height:25px; overflow:hidden; cursor:pointer" id="toogle_@ex.UniqueId" onclick="toggleDiv('@ex.UniqueId')">
+                                @foreach (var tag in ex.Tagging)
+                                {
+                                    <div class="bg-tags mb-1" style="color:@tag.Tag?.Color; background-color:@tag.Tag?.Color.HexToRGBA(0.2M)">@tag.Tag?.Name</div>
+                                }
+                            </div>
+                        </td>
+                        <td>@ex.CreatedOn</td>
+                        <td>
+                            <span onclick="window.scrollTo(0,0);">
+                                @* <i class="oi oi-pencil text-warning add-button add-button-table me-2" role="button" @onclick="()=> OpenForm(ex)"></i> *@
+                            </span>
+                            <a target="_blank" href="/transaction/@ex.Id"><span class="oi oi-list add-button add-button-table"></span></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

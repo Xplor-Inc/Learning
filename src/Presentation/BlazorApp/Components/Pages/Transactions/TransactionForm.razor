@@ -1,0 +1,181 @@
+﻿@using BlazorApp.Utilities;
+@using Blazorise.Components;
+@using Blazorise;
+
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IRepositoryConductor<TransactionTagging> TaggingRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+@if (Model != null)
+{
+    <div class="form">
+        <div class="heading">@(EditingForm ? "Update" : "Add") Transaction</div>
+        <span class="closeX bg-white" @onclick="() => CloseForm.InvokeAsync(false)">X</span>
+        <Validations Mode="ValidationMode.Auto" @ref="CustomValidation" Model="@Model" ValidateOnLoad=false HandlerType="typeof(FluentValidationHandler)">
+            <div class="row">
+                <div class="col-md-4 col-6">
+                    <label class="required">Transaction Account</label>
+                    <Validation>
+                        <SelectList Class="form-control" TItem="TransactionAccountDto" TValue="long"
+                                    @bind-SelectedValue="@Model.TransactionAccountId">
+                            <ChildContent>
+                                <TransactionAccountDropdown Accounts="Accounts" DefaultText="Select Account" Required=true />
+                            </ChildContent>
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </SelectList>
+                    </Validation>
+                    @if (Model.TransactionAccountId > 0)
+                    {
+                        <span class="text-warning" style="font-size:12px;">
+                            Available Balance
+                            @Accounts.FirstOrDefault(e => e.Id == Model.TransactionAccountId)?.Balance
+                        </span>
+                    }
+                </div>
+                <div class="col-md-4 col-6">
+                    <label class="required">Transaction Type</label>
+                    <Validation>
+                        <SelectList Class="form-control" TItem="TransactionType" TValue="TransactionType"
+                                    @bind-SelectedValue="@Model.TransactionType">
+                            <ChildContent>
+                                <option value="0" disabled="disabled">Select Type</option>
+                                @foreach (var value in Enum.GetValues<TransactionType>())
+                                {
+                                    <option value="@value">@value</option>
+                                }
+                            </ChildContent>
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </SelectList>
+                    </Validation>
+                </div>
+                @if (Model.TransactionType == TransactionType.Transfer && !EditingForm)
+                {
+                    <div class="col-md-4 col-6">
+                        <label class="required">Credit Account</label>
+                        <Validation>
+                            <SelectList Class="form-control" TItem="TransactionAccountDto" TValue="long?"
+                                        @bind-SelectedValue="@Model.CreditAccountId">
+                                <ChildContent>
+                                    <TransactionAccountDropdown Accounts="Accounts.Where(e => e.Id != Model.TransactionAccountId)" DefaultText="Select Account" AllowZeroBalance="true" />
+                                </ChildContent>
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </SelectList>
+                        </Validation>
+                    </div>
+                }
+                <div class="col-md-4 col-6">
+                    <label class="required">Category</label>
+                    <Validation>
+                        <SelectList Class="form-control" TItem="CategoryDto" TValue="long"
+                                    @bind-SelectedValue="@Model.CategoryId">
+                            <ChildContent>
+                                <option value="0">Select Category</option>
+                                @foreach (var value in Categories.Where(e => e.Type == CategoryType.Category))
+                                {
+                                    <option style="color:@value.Color; background-color:@value.Color.HexToRGBA(0.2M)" value="@value.Id">@value.Name</option>
+                                }
+                            </ChildContent>
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </SelectList>
+                    </Validation>
+                </div>
+                <div class="col-md-4 col-6">
+                    <Validation>
+                        <label class="required">Transaction Date</label>
+                        <DatePicker Max="@DateTimeOffset.Now" Placeholder="Select Date" TValue="DateTimeOffset" 
+                        @bind-Date=Model.TransactionDate InputFormat="dd-MMM-yyyy" DisplayFormat="dd-MMM-yyyy">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </DatePicker>
+                    </Validation>
+                </div>
+                @if (Model.TransactionType == TransactionType.Expense || Model.TransactionType == TransactionType.Transfer)
+                {
+                    <div class="col-md-4 col-6">
+                        <Validation>
+                            <label class="required"> Debit Amount</label>
+                            <NumericPicker Placeholder="Enter Amount" @bind-Value="@Model.Debit">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </NumericPicker>
+                        </Validation>
+                    </div>
+                }
+                @if (Model.TransactionType == TransactionType.Income || Model.TransactionAccountId == Model.CreditAccountId)
+                {
+                    <div class="col-md-4 col-6">
+                        <Validation>
+                            <label class="required"> Credit Amount</label>
+                            <NumericPicker Placeholder="Enter Amount" @bind-Value="@Model.Credit">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </NumericPicker>
+                        </Validation>
+                    </div>
+                }
+                <div class="col-md-4 col-12">
+                    <label class="required">Remark</label>
+                    <Validation>
+                        <Autocomplete TItem="string"
+                                      TValue="string"
+                                      Data="@Remarks"
+                                      TextField="@(( item ) => item)"
+                                      ValueField="@(( item ) => item)"
+                                      Placeholder="Enter remark"
+                                      SelectionMode="AutocompleteSelectionMode.Default"
+                                                    FreeTyping
+                                       Filter="AutocompleteFilter.Contains"
+                                       @bind-SelectedText="Model.Particular">
+                         </Autocomplete>
+                         <TextEdit Style="display:none" @bind-Text="@Model.Particular">
+                             <Feedback>
+                                 <ValidationError />
+                             </Feedback>
+                         </TextEdit>
+                     </Validation>
+                 </div>
+                 <div class="col-md-4 col-12">
+                     <label>Tags</label>
+                     <Autocomplete TItem="CategoryDto"
+                                   TValue="long"
+                                   Data="@Categories.Where(e => e.Type == CategoryType.Tag)"
+                                   TextField="@(( item ) => item.Name)"
+                                   ValueField="@(( item ) => item.Id)"
+                                   Placeholder="Type to search..."
+                                   SelectionMode="AutocompleteSelectionMode.Multiple"
+                                   Filter="AutocompleteFilter.Contains"
+                                   CustomFilter="@(( item, searchValue ) => { return searchValue.Length  == 0 ? true: item.Name.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0; })"
+                                   @bind-SelectedTexts="Model.TagNames"
+                                   @bind-SelectedValues="Model.TagIds">
+                     </Autocomplete>
+                 </div>
+                 <div class="col-md-4 button-pt">
+                     @if (EditingForm)
+                    {
+                        <Button Class="btn btn-warning" Clicked="() => Update()">Update</Button>
+                        <input type="button" class="btn btn-danger" value="Close" @onclick="()=>CloseForm.InvokeAsync(false)" />
+                    }
+                    else
+                    {
+                        <Button Class="btn btn-primary" Clicked="() => Submit(false)">@(Model.TransactionType == TransactionType.Transfer ? "Transfer" : "Add")</Button>
+                        <Button Class="btn btn-primary me-2" Clicked="() => Submit(true)">@(Model.TransactionType == TransactionType.Transfer ? "Transfer & Close" : "Add & Close")</Button>
+                    }
+                </div>
+            </div>
+        </Validations>
+    </div>
+}

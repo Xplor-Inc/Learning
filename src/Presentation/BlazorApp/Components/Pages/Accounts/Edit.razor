@@ -1,0 +1,226 @@
+﻿@using Blazorise;
+@using Blazorise.Components;
+
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+<Validations Mode="ValidationMode.Auto" @ref="CustomValidation" Model="@Model" ValidateOnLoad=false HandlerType="typeof(FluentValidationHandler)">
+    <div class="heading">Edit @EditingAccountName Account</div>
+    <span class="closeX bg-white" @onclick="()=>CloseForm.InvokeAsync()">X</span>
+    <div class="row">
+        <div class="col-md-3">
+            <label class="required">Account Type</label>
+            <Validation>
+                <SelectList Class="form-control" TItem="AccountType" TValue="AccountType" @bind-SelectedValue="@Model.AccountType">
+                    <ChildContent>
+                        <option value="0" disabled>Select</option>
+                        @foreach (var value in Enum.GetValues<AccountType>())
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </ChildContent>
+                    <Feedback>
+                        <ValidationError />
+                    </Feedback>
+                </SelectList>
+            </Validation>
+        </div>
+        <div class="col-md-3">
+            <label class="required">Account Name</label>
+            <Validation>
+                <TextEdit @bind-Text=Model.Name Placeholder="Account Name">
+                    <Feedback>
+                        <ValidationError />
+                    </Feedback>
+                </TextEdit>
+            </Validation>
+        </div>
+        <div class="col-md-3">
+            <label class="required">Account No</label>
+            <Validation>
+                <TextEdit @bind-Text=Model.AccountNumber Placeholder="Account No">
+                    <Feedback>
+                        <ValidationError />
+                    </Feedback>
+                </TextEdit>
+            </Validation>
+        </div>
+        <div class="col-md-3">
+            <label class="required">Opening Balance</label>
+            <Validation>
+                <NumericEdit @bind-Value=Model.OpeningBalance Placeholder="Opening Balance">
+                    <Feedback>
+                        <ValidationError />
+                    </Feedback>
+                </NumericEdit>
+            </Validation>
+        </div>
+        <div class="col-md-3">
+            <label class="required">Mobile No</label>
+            <Validation>
+                <TextEdit @bind-Text=Model.MobileNumber Placeholder="Mobile No">
+                    <Feedback>
+                        <ValidationError />
+                    </Feedback>
+                </TextEdit>
+            </Validation>
+        </div>
+
+        @if (Model.AccountType != AccountType.Loan && Model.AccountType != AccountType.Cash)
+        {
+            @if (Model.AccountType == AccountType.CreditCard)
+            {
+                <div class="col-md-3">
+                    <label class="required">Statement Day</label>
+                    <Validation>
+                        <NumericEdit @bind-Value=Model.StatementDay Placeholder="Statement Day">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </NumericEdit>
+                    </Validation>
+                </div>
+            }
+            @if (Model.AccountType == AccountType.Saving)
+            {
+                <div class="col-md-3">
+                    <label class="required">IFSC Code</label>
+                    <Validation>
+                        <TextEdit @bind-Text=Model.IFSCCode Placeholder="Debit Card No">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </Validation>
+                </div>
+            }
+            <div class="col-md-3">
+                <label class="required">@GetCardType() Card No</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.DebitCardNo Placeholder="Debit Card No">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">@GetCardType() Card PIN</label>
+                <Validation>
+                    <NumericEdit @bind-Value=Model.DebitCardPIN Placeholder="Debit Card PIN" Disabled=@string.IsNullOrEmpty(Model.DebitCardNo)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </NumericEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">@GetCardType() Card CVV</label>
+                <Validation>
+                    <NumericEdit @bind-Value=Model.DebitCardCVV Placeholder="Debit Card CVV" Disabled=@string.IsNullOrEmpty(Model.DebitCardNo)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </NumericEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">@GetCardType() Card Expire Date</label>
+                <Validation>
+                    <DatePicker Min="@DateTimeOffset.Now" TValue="DateTimeOffset?" @bind-Date=Model.DebitCardExpireDate InputFormat="dd-MMM-yyyy"
+                                DisplayFormat="dd-MMM-yyyy" Placeholder="Debit Card Expire Date" Disabled=@string.IsNullOrEmpty(Model.DebitCardNo)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </DatePicker>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">Mobile Banking PIN</label>
+                <Validation>
+                    <NumericEdit @bind-Value=Model.MobileBankingPIN Placeholder="Mobile Banking PIN">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </NumericEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">UPI Id</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.UPIId Placeholder="UPI Id">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">UPI PIN</label>
+                <Validation>
+                    <NumericEdit @bind-Value=Model.UPIPIN Placeholder="UPI PIN" Disabled=@string.IsNullOrEmpty(Model.UPIId)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </NumericEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">NetBanking URL</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.NetBankingURL Placeholder="NetBanking URL">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">NetBanking UserId</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.NetBankingUserId Placeholder="NetBanking UserId" Disabled=@string.IsNullOrEmpty(Model.NetBankingURL)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">NetBanking Password</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.NetBankingPassword Placeholder="NetBanking Password" Disabled=@string.IsNullOrEmpty(Model.NetBankingURL)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3">
+                <label class="required">NetBanking Trans Password</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.NetBankingTransPassword Placeholder="NetBanking Trans Password" Disabled=@string.IsNullOrEmpty(Model.NetBankingURL)>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+        }
+        <div class="col-md-2 col-3">
+            <label class="required">Status</label>
+            <div>
+                <Check @bind-Checked=Model.IsActive TValue="bool">
+                </Check>
+            </div>
+            <span></span>
+        </div>
+        <div class="col-md-4 col-9 button-pt button-mt">
+            <Button Class="btn me-3 btn-warning" Clicked="Update">Update</Button>
+            <button type="button" class="btn btn-primary" @onclick="()=>CloseForm.InvokeAsync()">Close</button>
+        </div>
+    </div>
+
+</Validations>

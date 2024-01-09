@@ -1,0 +1,27 @@
+﻿@inject IJSRuntime JS;
+
+<div class="info-box chart-table flex">
+    <div class="info-box">
+        <div class="heading">@ChartTable.Title</div>
+        <div style="height:180px" id="@ChartId"></div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Perticullar</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < ChartTable.Table.Count; i++)
+                {
+                    <tr>
+                        <td>@ChartTable.Table[i].Category</td>
+                        <td>@ChartTable.Table[i].Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

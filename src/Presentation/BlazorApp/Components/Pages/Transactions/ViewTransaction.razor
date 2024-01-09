@@ -1,0 +1,178 @@
+﻿@page "/transaction/{TransId:long}";
+
+@attribute [Authorize]
+
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<ChangeLog> LogRepo;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IRepositoryConductor<User> UserRepo;
+@inject IRepositoryConductor<RefundHistory> RefundRepo;
+@inject IMapper Mapper;
+
+<PageTitle>Transaction details</PageTitle>
+<div class="form">
+    <div class="heading flex">
+        <span>Transaction details</span>
+        @if ((Model.Credit > 0 && Model.TransactionType == TransactionType.Transfer) || Model.TransactionType != TransactionType.Transfer)
+        {
+            <input type="submit" class="btn btn-warning" value="Refund" @onclick="()=>{ProcessRefund = true;}" />
+        }
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <label>Transaction Account</label>
+            <label class="form-control" style="color:@Model.TransactionAccount?.AccountType.GetAccountColor(); background-color:@Model.TransactionAccount?.AccountType.GetAccountColor().HexToRGBA(0.2M)">
+                @Model.TransactionAccount?.Name
+            </label>
+        </div>
+        <div class="col-md-2">
+            <label>Transaction Type</label>
+            <label class="form-control" style="color:@Model.TransactionType.GetTransactionColor(); background-color:@Model.TransactionType.GetTransactionColor().HexToRGBA(0.2M)">
+                @Model.TransactionType
+            </label>
+        </div>
+        <div class="col-md-3">
+            <label>Category</label>
+            <label class="form-control" style="color:@Model.Category?.Color; background-color:@Model.Category?.Color.HexToRGBA(0.2M)">
+                @Model.Category?.Name
+            </label>
+        </div>
+        <div class="col-md-3">
+            <label>Transaction Date</label>
+            <label class="disabled form-control">
+                @Model.TransactionDate
+            </label>
+        </div>
+        <div class="col-md-2">
+            <label>Previous Balance</label>
+            <label class="disabled form-control">
+                @Model.PreviousBalance
+            </label>
+        </div>
+        <div class="col-md-2">
+            <label>Debit</label>
+            <label class="disabled form-control">
+                @Model.Debit
+            </label>
+        </div>
+        <div class="col-md-2">
+            <label>Credit</label>
+            <label class="disabled form-control">
+                @Model.Credit
+            </label>
+        </div>
+        <div class="col-md-2">
+            <label>Current Balance</label>
+            <label class="disabled form-control">
+                @Model.CurrentBalance
+            </label>
+        </div>
+        <div class="col-md-3">
+            <label>Remark</label>
+            <label class="disabled form-control">
+                @Model.Particular
+            </label>
+        </div>
+        <div class="col-md-3">
+            <label>Last Updated</label>
+            <label class="disabled form-control">
+                @Model.UpdatedOn
+            </label>
+        </div>
+        @if (Model.Tagging.Count > 0)
+        {
+            <div class="col-md-6">
+                <label>Tags</label>
+                <div class="disabled">
+                    @foreach (var tag in Model.Tagging)
+                    {
+                        var clr = tag.Tag?.Color ?? string.Empty;
+                        <span class="bg-tags me-1" style="display:inline-block; color:@clr; background-color:@clr.HexToRGBA(0.2M)">@tag.Tag?.Name</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.RefundHistories != null && Model.RefundHistories.Count > 0)
+{
+    <hr />
+    <div class="form">
+        <div class="heading">
+            Refund Histories
+        </div>
+        <div class="table-responsive p-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>SR.</th>
+                        <th>Date</th>
+                        <th>Total Amount</th>
+                        <th>Refunded Amount</th>
+                        <th>Balance</th>
+                        <th>Remark</th>
+                        <th>Refund Account</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.RefundHistories.Count; i++)
+                    {
+                        var r = Model.RefundHistories[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@r.Date</td>
+                            <td>@r.Total</td>
+                            <td>@r.Refund</td>
+                            <td>@r.Balance</td>
+                            <td>@r.Remark</td>
+                            <td>@r.RefundAccount?.Name</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Logs.Count > 0)
+{
+    <hr />
+    <div class="form">
+        <div class="heading">
+            Change Logs
+        </div>
+        <div class="table-responsive p-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>SR.</th>
+                        <th>Field Name</th>
+                        <th>Old Value</th>
+                        <th>New Value</th>
+                        <th>Changed On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Logs.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@Logs[i].PropertyName</td>
+                            <td>@Logs[i].OldValue</td>
+                            <td>@Logs[i].NewValue</td>
+                            <td>@Logs[i].CreatedOn</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (ProcessRefund)
+{
+    <RefundComponent TransactionId=Model.Id ProcessRefundPopup=@ProcessRefundPopup
+                     TransactionAccountId=Model.TransactionAccountId />
+}

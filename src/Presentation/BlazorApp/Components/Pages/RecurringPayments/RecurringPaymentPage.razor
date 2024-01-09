@@ -1,0 +1,185 @@
+﻿@page "/recurring-payments";
+
+@attribute [Authorize]
+
+@using Blazorise;
+@using Blazorise.Components;
+
+@inject IJSRuntime JS;
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<RecurringBill> RPRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+<PageTitle>Recurring Bills Management</PageTitle>
+
+<div class="form">
+    <div class="heading">
+        <span>Recurring Bills Management</span>
+    </div>
+    <Validations Mode="ValidationMode.Auto" @ref="CustomValidation" Model="@Model" ValidateOnLoad=false HandlerType="typeof(FluentValidationHandler)">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <label>Bill Name</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.BillName Class="form-control" Placeholder="Bill Name">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3 col-6">
+                <label>Bill Account No</label>
+                <Validation>
+                    <TextEdit @bind-Text=Model.AccountNo Class="form-control" Placeholder="Account No">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </div>
+            <div class="col-md-3 col-6">
+                <Validation>
+                    <label class="required">Transaction Date</label>
+                    <DatePicker Max="@DateTimeOffset.Now" Placeholder="Current Payment Date" TValue="DateTimeOffset" @bind-Date=Model.StartDate InputFormat="dd-MMM-yyyy" DisplayFormat="dd-MMM-yyyy">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </DatePicker>
+                </Validation>
+            </div>
+            <div class="col-md-3 col-6">
+                <label class="required">Frequency</label>
+                <Validation>
+                    <SelectList Class="form-control" TItem="RecurringFrequency" TValue="RecurringFrequency"
+                                @bind-SelectedValue="@Model.Frequency">
+                        <ChildContent>
+                            <option value="0" disabled="disabled">Select Type</option>
+                            @foreach (var value in Enum.GetValues<RecurringFrequency>())
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </ChildContent>
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </SelectList>
+                </Validation>
+            </div>
+            @if (Model.Frequency == RecurringFrequency.Days)
+            {
+                <div class="col-md-3 col-6">
+                    <label>Bill Days</label>
+                    <Validation>
+                        <NumericEdit @bind-Value=Model.NextPaymentDays Class="form-control" Placeholder="Billing Days">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </NumericEdit>
+                    </Validation>
+                </div>
+            }
+            <div class="col-md-3 col-6">
+                <label>Bill Amount</label>
+                <Validation>
+                    <NumericEdit @bind-Value=Model.Amount Class="form-control" Placeholder="Bill Amount">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </NumericEdit>
+                </Validation>
+            </div>
+            <div class="col-md-1 col-6 pe-0">
+                <label class="required">Auto Debit</label>
+                <div>
+                    <Check @bind-Checked=Model.AutoDebit TValue="bool" />
+                    <span></span>
+                </div>
+            </div>
+            @if (Model.AutoDebit)
+            {
+                <div class="col-md-3 col-6">
+                    <label class="required">Debit Account</label>
+                    <Validation>
+                        <SelectList Class="form-control" TItem="TransactionAccountDto" TValue="long?"
+                                    @bind-SelectedValue="@Model.DebitAccountId">
+                            <ChildContent>
+                                <TransactionAccountDropdown Accounts="Accounts" DefaultText="Select Account" Required=true  AllowZeroBalance=true/>
+                            </ChildContent>
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </SelectList>
+                    </Validation>
+                </div>
+            }
+            <div class="col-md-2 col-6 button-pt button-mt">
+                @if (EditingForm)
+                {
+                    <Button Class="btn me-3 btn-warning" Clicked="Update">Update</Button>
+                    <button type="button" class="btn btn-primary" @onclick="()=>{ EditingForm = false; Model = new RecurringBillDto ();}">Close</button>
+                }
+                else
+                {
+                    <Button Class="btn me-3 btn-success" Clicked="Submit">Add</Button>
+                }
+            </div>
+        </div>
+    </Validations>
+
+    <hr />
+    <div class="flex heading">
+        <div class="">Recurring Bills</div>
+        <div>Current Payment : @Bills.Where(e => e.StartDate.AddDays(e.NextPaymentDays).Month == DateTime.Now.Month).Sum(s => s.Amount)</div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR#</th>
+                    <th>Bill Name</th>
+                    <th>Account No</th>
+                    <th>Recurring Type</th>
+                    <th>Amount</th>
+                    <th>Auto Debit</th>
+                    <th>Last Payment</th>
+                    <th>Next Payment</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Bills.Count == 0)
+                {
+                    <tr>
+                        <td class="p-2 text-danger text-center" colspan="9">There is no bill created yet..</td>
+                    </tr>
+                }
+                @for (int i = 0; i < Bills.Count; i++)
+                {
+                    var act = Bills[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@(act.BillName)</td>
+                        <td>@(act.AccountNo)</td>
+                        <td>@(act.Frequency)</td>
+                        <td>@(act.Amount)</td>
+                        <td>@(act.AutoDebit)</td>
+                        <td>@(act.StartDate)</td>
+                        <td><span>@act.StartDate.AddDays(act.NextPaymentDays)</span></td>
+                        <td>
+                            <span class="oi oi-list add-button add-button-table" role="button" @onclick="()=>{Model = act;EditingForm = true;}"></span>
+                            <EditForm Model="Model" OnValidSubmit="()=>Delete(act.Id)" method="post" style="display:inline">
+                                <InputNumber @bind-Value=act.Id class="visually-hidden" />
+                                <button type="submit" onclick="return window.confirm('Are you sure to delete Bill @act.BillName')" role="button" value="" class="oi oi-trash add-button add-button-table text-danger">
+                                </button>
+                            </EditForm>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

@@ -1,0 +1,234 @@
+﻿@page "/transactions";
+
+@attribute [Authorize]
+
+@using BlazorApp.Utilities;
+@using Blazorise.Components;
+@using Microsoft.AspNetCore.Authorization
+@using Blazorise;
+
+@inject IRepositoryConductor<Transaction> ExpenseRepo;
+@inject IRepositoryConductor<Category> CatRepo;
+@inject IRepositoryConductor<TransactionAccount> AccountRepo;
+@inject IRepositoryConductor<TransactionTagging> TaggingRepo;
+@inject IMapper Mapper;
+@inject INotificationService NotificationService ;
+
+<PageTitle>Transaction Management</PageTitle>
+@if (Loading)
+{
+    <Loader />
+}
+
+@if (OpenPopup)
+{
+    <div class="popup">
+        <TransactionForm Accounts="Accounts" Categories="Categories" CloseForm="CloseForm" Model="Edit" />
+    </div>
+    <div class="overlay"></div>
+}
+
+<form method="post" class="form">
+    <div class="heading flex">
+        <label>Transaction Management</label>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-6">
+            <label>From Date</label>
+            <DatePicker Max="@DateTimeOffset.Now" Placeholder="From Date" TValue="DateTimeOffset?"
+                        @bind-Date=SearchModel.FromDate InputFormat="dd-MMM-yyyy" DisplayFormat="dd-MMM-yyyy" />
+
+        </div>
+        <div class="col-md-2 col-6">
+            <label>To Date</label>
+            <DatePicker Max="@DateTimeOffset.Now" Min=@SearchModel.FromDate Placeholder="To Date" TValue="DateTimeOffset?"
+                        @bind-Date=SearchModel.ToDate InputFormat="dd-MMM-yyyy" DisplayFormat="dd-MMM-yyyy" />
+
+        </div>
+        <div class="col-md-2 col-6">
+            <label>Pay Date</label>
+            <DatePicker Max="@DateTimeOffset.Now" Placeholder="Pay Date" TValue="DateTimeOffset?"
+                        @bind-Date=SearchModel.PaymentDate InputFormat="dd-MMM-yyyy" DisplayFormat="dd-MMM-yyyy" />
+
+        </div>
+        <div class="col-md-2 col-6">
+            <label>Transaction Type</label>
+            <SelectList Class="form-control" TItem="TransactionType" TValue="TransactionType?"
+                        @bind-SelectedValue="@SearchModel.TransactionType">
+                <ChildContent>
+                    <option value="" disabled="disabled">Select Type</option>
+                    @foreach (var value in Enum.GetValues<TransactionType>())
+                    {
+                        <option value="@value">@value</option>
+                    }
+                </ChildContent>
+            </SelectList>
+        </div>
+        <div class="col-md-2 col-6">
+            <label>Debit Account</label>
+            <SelectList Class="form-control" TItem="TransactionAccountDto" TValue="long?"
+                        @bind-SelectedValue="@SearchModel.DebitAccountId">
+                <ChildContent>
+                    <TransactionAccountDropdown Accounts="Accounts" DefaultText="Debit Account" AllowZeroBalance />
+                 </ChildContent>
+                 <Feedback>
+                     <ValidationError />
+                 </Feedback>
+             </SelectList>
+         </div>
+         <div class="col-md-2 col-6">
+             <label>Credit Account</label>
+             <SelectList Class="form-control" TItem="TransactionAccountDto" TValue="long?"
+                         @bind-SelectedValue="@SearchModel.CreditAccountId">
+                 <ChildContent>
+                     <TransactionAccountDropdown Accounts="Accounts" DefaultText="Credit Account" AllowZeroBalance />
+                 </ChildContent>
+                 <Feedback>
+                     <ValidationError />
+                 </Feedback>
+             </SelectList>
+         </div>
+         <div class="col-md-2 col-6">
+             <label>Category</label>
+             <SelectList Class="form-control" TItem="CategoryDto" TValue="long?"
+                         @bind-SelectedValue="@SearchModel.CategoryId">
+                 <ChildContent>
+                     <option value="">Select Category</option>
+                     @foreach (var value in Categories.Where(e => e.Type == CategoryType.Category))
+                    {
+                        <option style="color:@value.Color; background-color:@value.Color.HexToRGBA(0.2M)" value="@value.Id">@value.Name</option>
+                    }
+                </ChildContent>
+                <Feedback>
+                    <ValidationError />
+                </Feedback>
+            </SelectList>
+        </div>
+        <div class="col-md-2 col-6">
+            <label>Debt Status</label>
+            <select class="form-control">
+                <option value="">All</option>
+                <option value={0}>None</option>
+                <option value={1}>Pending</option>
+                <option value={2}>Paid</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-6">
+            <label>Remark</label>
+            <Autocomplete TItem="string"
+                          TValue="string"
+                          Data="@Remarks"
+                          TextField="@(( item ) => item)"
+                          ValueField="@(( item ) => item)"
+                          Placeholder="Enter remark"
+                          SelectionMode="AutocompleteSelectionMode.Default"
+                                        FreeTyping
+                           Filter="AutocompleteFilter.Contains"
+                           @bind-SelectedText="SearchModel.SearchText">
+             </Autocomplete>
+
+         </div>
+         <div class="col-md-3 col-9">
+             <label>Tags</label>
+             <SelectList Class="form-control" TItem="CategoryDto" TValue="long"
+                         @bind-SelectedValues="@SearchModel.Tags">
+                 <ChildContent>
+                     <option value="">Select Category</option>
+                     @foreach (var value in Categories.Where(e => e.Type == CategoryType.Tag))
+                    {
+                        <option style="color:@value.Color; background-color:@value.Color.HexToRGBA(0.2M)" value="@value.Id">@value.Name</option>
+                    }
+                </ChildContent>
+                <Feedback>
+                    <ValidationError />
+                </Feedback>
+            </SelectList>
+        </div>
+
+        <div class="col-md-2 col-3 button-pt ps-0 pe-0">
+            <Button Class="btn btn-warning" Clicked="SearchData">
+                <Icon Name="IconName.Search" />
+            </Button>
+            <Button Class="btn btn-primary" Clicked="OpenForm">
+                <Icon Name="IconName.Add" Class="icon" />
+            </Button>
+        </div>
+    </div>
+</form>
+
+<div class="form p-2 mt-2">
+    <div class="flex">
+        <div class="text-success">Income: <strong>@SearchModel.Income</strong> </div>
+        <div class="text-danger">Expense: <strong>@SearchModel.Expense</strong> </div>
+        <div>
+            <Paging ItemPerPage="SearchModel.PageSize" NextPage="NextPage" PrevPage="PrevPage" RowCount="SearchModel.Count" Skip="SearchModel.Skip" />
+        </div>
+    </div>
+    <div class="table-responsive pt-1">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR.</th>
+                    <th>Date</th>
+                    <th>Account</th>
+                    <th>Category</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Balance</th>
+                    <th>Remark</th>
+                    <th>Tags</th>
+                    <th>Created On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Expenses.Count == 0)
+                {
+                    <tr>
+                        <td class="p-2 text-danger text-center" colspan="9">There is no expenses</td>
+                    </tr>
+                }
+                @for (int a = 0; a < Expenses.Count; a++)
+                {
+                    var ex = Expenses[a];
+                    var clr = ex.TransactionType.GetTransactionColor();
+                    <tr style="font-weight:@(ex.IsRefunded ? "700":"400")">
+                        <td>@(a + 1)</td>
+                        <td>@($"{ex.TransactionDate:dd-MMM-yyyy}")</td>
+                        <td> <span class="bg-tags" style="color:@clr; background-color:@clr?.HexToRGBA(0.2M)">@ex.TransactionAccount?.Name</span> </td>
+                        <td> <span class="bg-tags" style="color:@ex.Category?.Color; background-color:@ex.Category?.Color.HexToRGBA(0.2M)">@ex.Category?.Name</span> </td>
+                        <td>@ex.Debit</td>
+                        <td>@ex.Credit</td>
+                        <td>@ex.CurrentBalance</td>
+                        <td>@ex.Particular</td>
+                        <td>
+                            <div style="height:25px; overflow:hidden; cursor:pointer" id="toogle_@ex.UniqueId" onclick="toggleDiv('@ex.UniqueId')">
+                                @foreach (var tag in ex.Tagging)
+                                {
+                                    <div class="bg-tags mb-1" style="color:@tag.Tag?.Color; background-color:@tag.Tag?.Color.HexToRGBA(0.2M)">@tag.Tag?.Name</div>
+                                }
+                            </div>
+                        </td>
+                        <td>@ex.CreatedOn</td>
+                        <td>
+                            <span onclick="window.scrollTo(0,0);">
+                                <i class="oi oi-pencil text-warning add-button add-button-table me-2" role="button" @onclick="()=> OpenForm(ex)"></i>
+                            </span>
+                            <a target="_blank" href="/transaction/@ex.Id"><span class="oi oi-list add-button add-button-table"></span></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script>
+    function toggleDiv(id) {
+        var ele = document.getElementById("toogle_" + id);
+        var x = ele.style.height;
+        x = x == "25px" ? "auto" : "25px";
+        ele.style.height = x;
+    }
+</script>
